@@ -1,7 +1,12 @@
-// src/components/app-sidebar.jsx
 "use client";
 
-import { ChartBar, LayoutDashboard, Link, Link2 } from "lucide-react";
+import {
+  ChartBar,
+  House,
+  Newspaper,
+  BookOpen,
+  FileText,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -12,29 +17,35 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
+import { authClient } from "@/lib/auth-client";
 
 const data = {
-  user: {
-    name: "André",
-    email: "andre@email.com",
-    avatar:
-      "https://avataaars.io/?avatarStyle=Transparent&topType=LongHairBun&accessoriesType=Prescription02&hairColor=BrownDark&facialHairType=BeardMedium&facialHairColor=BrownDark&clotheType=ShirtCrewNeck&clotheColor=Black&eyeType=Default&eyebrowType=Default&mouthType=Twinkle&skinColor=Light",
-  },
   navMain: [
     {
-      title: "Dashboard",
+      title: "Início",
       url: "/dashboard",
-      icon: LayoutDashboard,
+      icon: House,
     },
     {
-      title: "Links",
-      url: "/links",
-      icon: Link2,
+      title: "Artigos",
+      url: "/artigos",
+      icon: Newspaper,
     },
     {
-      title: "Analytics",
+      title: "Posts",
+      url: "/post-admin",
+      icon: FileText,
+    },
+    {
+      title: "Categorias",
+      url: "/categorias",
+      icon: BookOpen,
+    },
+    {
+      title: "Estatísticas",
       url: "/analytics",
       icon: ChartBar,
     },
@@ -42,6 +53,20 @@ const data = {
 };
 
 export function AppSidebar({ ...props }) {
+  const { data: session, isPending } = authClient.useSession();
+
+  const user = session?.user
+    ? {
+      name: session.user.name ?? "Usuário",
+      email: session.user.email ?? "",
+      avatar:
+        session.user.image ??
+        `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(
+          session.user.name ?? "User"
+        )}`,
+    }
+    : null;
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -51,19 +76,23 @@ export function AppSidebar({ ...props }) {
               asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <a href="#">
-                <Link className="size-5!" />
-                <span className="text-base font-semibold">minURL</span>
+              <a href="/dashboard">
+                <BookOpen className="size-5!" />
+                <span className="text-base font-semibold">
+                  BlogMens
+                </span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
         <NavMain items={data.navMain} />
       </SidebarContent>
+
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {!isPending && user && <NavUser user={user} />}
       </SidebarFooter>
     </Sidebar>
   );

@@ -1,6 +1,12 @@
 "use client";
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { authClient } from "@/lib/auth-client";
+
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,13 +14,40 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    setError("");
+    setLoading(true);
+
+    const { error } = await authClient.signIn.email({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setError("E-mail ou senha inválidos.");
+      return;
+    }
+
+    router.push("/dashboard");
+  }
+
   return (
-    // Wrapper para centralizar o card na tela com um fundo leve
     <div className="flex min-h-[80vh] items-center justify-center p-4">
       <Card className="w-full max-w-md border-slate-200 shadow-xl transition-all hover:shadow-2xl">
         <CardHeader className="space-y-2 text-center">
@@ -27,8 +60,14 @@ export default function Login() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={(e) => e.preventDefault()}>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-6">
+              {error && (
+                <p className="text-center text-sm text-red-500">
+                  {error}
+                </p>
+              )}
+
               {/* Campo de Email */}
               <div className="grid gap-2">
                 <Label htmlFor="email" className="text-sm font-semibold">
@@ -39,6 +78,8 @@ export default function Login() {
                   type="email"
                   placeholder="nome@exemplo.com"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="h-11 border-slate-300 focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
@@ -46,44 +87,57 @@ export default function Login() {
               {/* Campo de Senha */}
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" name="password" className="text-sm font-semibold">
+                  <Label
+                    htmlFor="password"
+                    className="text-sm font-semibold"
+                  >
                     Senha
                   </Label>
+
                   <Link
                     href="#"
-
+                    className="text-sm text-indigo-600 hover:underline"
                   >
                     Esqueceu a senha?
                   </Link>
                 </div>
+
                 <Input
                   id="password"
                   type="password"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="h-11 border-slate-300 focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
               <Button
                 type="submit"
-                className="h-11 w-full bg-indigo-600 text-white font-bold hover:bg-indigo-700"
+                disabled={loading}
+                className="h-11 w-full bg-indigo-600 font-bold text-white hover:bg-indigo-700"
               >
-                Entrar
+                {loading ? "Entrando..." : "Entrar"}
               </Button>
             </div>
           </form>
 
-          {/* Divisor Visual */}
+          {/* Divisor */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-slate-300" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-slate-500">Ou continue com</span>
+              <span className="bg-white px-2 text-slate-500">
+                Ou continue com
+              </span>
             </div>
           </div>
 
-          <Button variant="outline" className="h-11 w-full border-slate-300 font-semibold hover:bg-slate-50">
+          <Button
+            variant="outline"
+            className="h-11 w-full border-slate-300 font-semibold hover:bg-slate-50"
+          >
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -102,6 +156,7 @@ export default function Login() {
                 fill="#EA4335"
               />
             </svg>
+
             Google
           </Button>
         </CardContent>
@@ -109,12 +164,15 @@ export default function Login() {
         <CardFooter className="justify-center border-t border-slate-100 bg-slate-50/50 py-4">
           <p className="text-sm text-slate-600">
             Não tem uma conta?{" "}
-            <Link href="/cadastro" className="font-bold text-indigo-600 hover:text-indigo-500">
+            <Link
+              href="/cadastro"
+              className="font-bold text-indigo-600 hover:text-indigo-500"
+            >
               Cadastre-se
             </Link>
           </p>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
