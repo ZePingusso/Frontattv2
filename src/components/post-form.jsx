@@ -77,16 +77,6 @@ export default function PostForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="post-image">URL da Imagem</Label>
-            <Input
-              id="post-image"
-              value={safeForm.image}
-              onChange={(e) => updateField("image", e.target.value)}
-              placeholder="https://..."
-            />
-          </div>
-
-          <div className="grid gap-2">
             <Label htmlFor="post-content">Conteúdo</Label>
 
             <textarea
